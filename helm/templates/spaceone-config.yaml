@@ -4,6 +4,8 @@ metadata:
   name: spacectl-config
   namespace: {{ .Release.Namespace }}
 data: 
+  environment.yml: |
+    environment: default
   default.yml: |
     api_key: {{ .Values.spacectl.api_key }}
     endpoints:

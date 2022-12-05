@@ -12,35 +12,34 @@ spec:
         spec:
           initContainers:
           - name: prepare-{{ .Values.name }}
-            image: busybox:1.28
-            command: ["sh", "-c", "git", "clone", {{ .Values.job.source_git }}, "/tmp/jobs/"]
+            image: alpine/git:2.36.3 
+            command: ["git", "clone", {{ .Values.job.source_git }}, "/spaceone/jobs"]
             volumeMounts:
-            - name: jobs
-              mountPath: /tmp/jobs/
+            - name: share
+              mountPath: /spaceone
           containers:
           - name: {{ .Values.name }}
             image: {{ .Values.image.name }}:{{ .Values.image.version }}
             imagePullPolicy: {{ .Values.imagePullPolicy }}
-            env:
-            - name: job-path
-              value: /opt/jobs/
-            - name: job-name
-              value: {{ .Values.job.name }}.yaml
-            command: ["sh", "-c", "spacectl", "apply"]
-            args: ["$(job-path)/$(job-name)"]
-            postStart:
-              exec:
-                command: ["/bin/bash", "pip3", "install", "--pre", "--upgrade", "spaceone-core", "spaceone-api"]
+            command: ["spacectl", "apply", "/spaceone/jobs/{{ .Values.job.name }}.yaml"]
+            lifecycle:
+              postStart:
+                exec:
+                  command: ["sh", "-c", "pip3", "install", "--pre", "--upgrade", "spaceone-core", "spaceone-api"]
             volumeMounts:
-            - name: jobs
-              mountPath: /opt/
+            - name: share
+              mountPath: /spaceone
             - name: spacectl
-              mountPath: ~/.spacectl/environments/default.yml
+              mountPath: /root/.spaceone/environment.yml
+              subPath: environment.yml
+              readOnly: true
+            - name: spacectl
+              mountPath: /root/.spaceone/environments/default.yml
               subPath: default.yml
               readOnly: true
           restartPolicy: OnFailure
           volumes:
-          - name: jobs
+          - name: share
             emptyDir: {}
           - name: spacectl
             configMap:
