@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spacectl-config
+  namespace: {{ .Release.Namespace }}
+data: 
+  default.yml: |
+    api_key: {{ .Values.spacectl.api_key }}
+    endpoints:
+      inventory: grpc+ssl://inventory.api.dev.spaceone.dev:443
+      monitoring: grpc+ssl://monitoring.api.dev.spaceone.dev:443
+      notification: grpc+ssl://notification.api.dev.spaceone.dev:443
+      plugin: grpc+ssl://plugin.api.dev.spaceone.dev:443
+      repository: grpc+ssl://repository.api.dev.spaceone.dev:443
+      secret: grpc+ssl://secret.api.dev.spaceone.dev:443
+      statistics: grpc+ssl://statistics.api.dev.spaceone.dev:443
+      cost_analysis: grpc+ssl://cost-analysis.api.dev.spaceone.dev:443
+      identity: grpc+ssl://identity.api.dev.spaceone.dev:443
+      dashboard: grpc+ssl://dashboard.api.dev.spaceone.dev:443

@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace | default .Release.Namespace }}
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          initContainers:
+          - name: prepare-{{ .Values.name }}
+            image: busybox:1.28
+            command: ["sh", "-c", "git", "clone", {{ .Values.job.source_git }}, "/tmp/jobs/"]
+            volumeMounts:
+            - name: jobs
+              mountPath: /tmp/jobs/
+          containers:
+          - name: {{ .Values.name }}
+            image: {{ .Values.image.name }}:{{ .Values.image.version }}
+            imagePullPolicy: {{ .Values.imagePullPolicy }}
+            env:
+            - name: job-path
+              value: /opt/jobs/
+            - name: job-name
+              value: {{ .Values.job.name }}.yaml
+            command: ["sh", "-c", "spacectl", "apply"]
+            args: ["$(job-path)/$(job-name)"]
+            postStart:
+              exec:
+                command: ["/bin/bash", "pip3", "install", "--pre", "--upgrade", "spaceone-core", "spaceone-api"]
+            volumeMounts:
+            - name: jobs
+              mountPath: /opt/
+            - name: spacectl
+              mountPath: ~/.spacectl/environments/default.yml
+              subPath: default.yml
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: jobs
+            emptyDir: {}
+          - name: spacectl
+            configMap:
+              name: spacectl-config

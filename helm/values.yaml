@@ -1,0 +1,14 @@
+name: spacejob
+namespace: default
+image:
+    name: spaceone/spacectl
+    version: latest
+imagePullPolicy: IfNotPresent
+cronjob: 
+  schedule: "* * * * *" # every minute
+  successfulJobsHistoryLimit: 10
+job:
+  name: job_name
+  source_git: https://github.com/ogz/repo.git
+spacectl:
+  api_key: insert_your_api_key

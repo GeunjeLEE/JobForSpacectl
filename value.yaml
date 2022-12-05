@@ -1,0 +1,14 @@
+name: spacejob
+namespace: default
+image:
+    name: spaceone/spacectl
+    version: "v1.10.4"
+imagePullPolicy: IfNotPresent
+cronjob: 
+  schedule: "* * * * *" # every minute
+  successfulJobsHistoryLimit: 10
+job: 
+  name: list
+  source_git: https://github.com/GeunjeLEE/jobs.git
+spacectl:
+  api_key: hogehoge
